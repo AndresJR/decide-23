@@ -2,20 +2,27 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
+
 
 from base import mods
 from base.models import Auth, Key
 
+'''
+class QuestionYN(models.Model):
 
-class Question(models.Model):
     desc = models.TextField()
+    
+   
 
     def __str__(self):
         return self.desc
 
-
-class QuestionOption(models.Model):
-    question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
+class QuestionOptionYN(models.Model):
+    question = models.ForeignKey(QuestionYN, related_name='options', on_delete=models.CASCADE)
+    YES= 'Y'
+    NO = 'N'
+    OPTIONS_YN = [(YES,'YES'),(NO, 'NO')]
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
@@ -27,11 +34,43 @@ class QuestionOption(models.Model):
     def __str__(self):
         return '{} ({})'.format(self.option, self.number)
 
+'''
+class Question(models.Model):
+    QUEST_YES_O_NO= 'YES OR NO TYPE'
+    NORMAL_QUEST= 'NORMAL QUESTION'
+    OPTIONS = [(QUEST_YES_O_NO,'PREGUNTA DE SI O NO'),(NORMAL_QUEST, 'PREGUNTA DE OPCIÓN MULTIPLE')]
+    
+    
+    desc = models.TextField()
+    type = models.CharField(max_length=55, choices=OPTIONS,default=NORMAL_QUEST)
+
+    def __str__(self):
+        return self.desc
+
+
+class QuestionOption(models.Model):
+    question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
+    
+    number = models.PositiveIntegerField(blank=True, null=True)
+    YES= 'Y'
+    NO = 'N'
+    OPTIONS_YN = [(YES,'YES'),(NO, 'NO')]    
+    if Question.type == 'YES OR NO TYPE':
+        option =models.CharField(max_length=4,choices=OPTIONS_YN,default=YES)
+    else:
+        option = models.TextField()
+ 
+    
+    def save(self):
+        if not self.number:
+            self.number = self.question.options.count() + 2
+        return super().save()
 
 class Voting(models.Model):
     name = models.CharField(max_length=200)
     desc = models.TextField(blank=True, null=True)
     question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
+    #questionYN= models.ForeignKey(QuestionYN, related_name='voting', on_delete=models.CASCADE)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
