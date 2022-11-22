@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/wadobo/decide.svg?branch=master)](https://travis-ci.com/wadobo/decide) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/94a85eaa0e974c71af6899ea3b0d27e0)](https://www.codacy.com/app/Wadobo/decide?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=wadobo/decide&amp;utm_campaign=Badge_Grade) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/94a85eaa0e974c71af6899ea3b0d27e0)](https://www.codacy.com/app/Wadobo/decide?utm_source=github.com&utm_medium=referral&utm_content=wadobo/decide&utm_campaign=Badge_Coverage)
+[![Python application](https://github.com/jorsilman/decide-23/actions/workflows/django.yml/badge.svg)](https://github.com/jorsilman/decide-23/actions/workflows/django.yml)
 
 Plataforma voto electrónico educativa
 =====================================
@@ -291,4 +292,4 @@ A tener en cuenta:
 * Si hacemos las pruebas en local, donde tenemos activado el modo debug de Django, lo normal es que
   las peticiones tarden algo más y consigamos menos RPS (Peticiones por segundo).
 
-[![Python application](https://github.com/jorsilman/decide-23/actions/workflows/django.yml/badge.svg)](https://github.com/jorsilman/decide-23/actions/workflows/django.yml)
+
