@@ -1,9 +1,10 @@
 name: Python application
 
-on:
+on: 
   push:
      branches:
-	    - jorsilman
+          - master
+          - develop
   workflow_call:
     secrets:
       CODACY_PROJECT_TOKEN:
