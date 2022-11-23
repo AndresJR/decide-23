@@ -2,9 +2,9 @@ name: Python application
 
 on: 
   push:
-     branches:
-          - master
-          - develop
+    branches:
+      - master
+      - develop
   workflow_call:
     secrets:
       CODACY_PROJECT_TOKEN:
