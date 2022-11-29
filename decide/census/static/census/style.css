@@ -1,0 +1,34 @@
+.bg-1{
+    background: linear-gradient(to right, rgb(97, 67, 133), rgb(81, 99, 149));
+    height: 50vh;
+    padding-top: 150px;
+ }
+ 
+ .t-stroke {
+   color: transparent;
+   -moz-text-stroke-width: 2px;
+   -webkit-text-stroke-width: 2px;
+   -moz-text-stroke-color: #000000;
+   -webkit-text-stroke-color: #ffffff;
+ }
+ 
+ .t-shadow {
+   text-shadow: 7px 7px #8dffcd;
+ }
+ 
+.pepe {
+	position: relative;
+	text-align: center;
+	font-size: x-large;
+	font-family: 'Press Start 2P', cursive;
+	animation-name: anim;
+	animation-duration: 5s;
+	animation-iteration-count: infinite;
+}
+@keyframes anim{
+    0% {color: blue;} /*Amarillo*/
+   25% {color: purple;} /*Naranja*/
+   50% {color: red;} /*Negro*/
+   75% {color: black;} /*Otra vez naranja*/
+  100% {color: blue;} /*Otra vez amarillo*/
+}
