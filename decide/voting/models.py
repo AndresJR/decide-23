@@ -43,6 +43,9 @@ class VotingBinary(models.Model):
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    uniqueType = (('BV', 'BinaryVoting'),)
+    type = models.CharField(max_length=2, choices= uniqueType,default='BV')
+
     def toJson(self):
         json = {'id': self.id, 
                 'name': self.name, 
@@ -53,7 +56,8 @@ class VotingBinary(models.Model):
                             'url': self.auths.all()[0].url, 
                             'me': self.auths.all()[0].me}], 
                 'tally': self.tally, 
-                'postproc': self.postproc}
+                'postproc': self.postproc,
+                'type':self.type}
         question = {'desc': self.question.desc}
         options = []
         for o in self.question.options.all():
@@ -191,6 +195,37 @@ class Voting(models.Model):
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    uniqueType = (('V', 'Voting'),)
+    type = models.CharField(max_length=2, choices= uniqueType,default='V')
+
+
+    def toJson(self):
+        json = {'id': self.id, 
+                'name': self.name, 
+                'desc': self.desc, 
+                'start_date': str(self.start_date),
+                'end_date': str(self.end_date),
+                'auths': [{'name': self.auths.all()[0].name, 
+                            'url': self.auths.all()[0].url, 
+                            'me': self.auths.all()[0].me}], 
+                'tally': self.tally, 
+                'postproc': self.postproc,
+                'type':self.type}
+        question = {'desc': self.question.desc}
+        options = []
+        for o in self.question.options.all():
+            options.append({'number': o.number,'option':o.option})
+        question['options'] = options
+        json['question'] = question
+
+        if self.pub_key == None:
+            json['pub_key'] = 'None'
+        else:
+            json['pub_key'] = {'p': str(self.pub_key.p), 
+                            'g': str(self.pub_key.g), 
+                            'y': str(self.pub_key.y)}
+
+        return json
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
             return
