@@ -18,7 +18,7 @@ jobs:
     
     strategy:
       matrix:
-        pyversion: ['3.8', '3.5']
+        pyversion: ['3.8']
         pgversion: ['10.8', '12']
 
     services:
