@@ -40,6 +40,19 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <figure class="highcharts-figure">
+                    <div id="container"></div>
+                    
+                </figure>
+
+                <figure class="highcharts-figure">
+                    <div id="grafica2"></div>
+                    <p class="highcharts-description">
+                        
+                    </p>
+                </figure>
+            
             </div>
 
         </div>
@@ -51,6 +64,14 @@
     <script src="https://unpkg.com/vue@2.7.10"></script>
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+
+    <!-- Chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
     <script>
         var voting = {{voting|safe}};
@@ -62,5 +83,112 @@
             }
         })
     </script>
+
+    <script>
+        let labels = voting.postproc.map((opt) => opt.option)
+        let postproc = voting.postproc.map((opt) => opt.postproc)
+        let votes = voting.postproc.map((opt) => opt.votes)
+       
+        let grafica2 = labels.map(function(e, i) {
+            return [e, votes[i]];
+        });
+        
+        Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                
+                text: voting.name
+            },
+            xAxis: {
+                categories: labels,
+                crosshair: true
+            },
+            yAxis: {
+                title: {
+                    
+                    text: 'Número de votos'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Votes',
+                data: votes
+
+            },
+            {
+                name: 'Post proc',
+                data: postproc
+
+            }]
+        });
+
+        
+        Highcharts.chart('grafica2', {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+            title: {
+                text: voting.name,
+                align: 'center',
+                verticalAlign: 'middle',
+                y: 60
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            plotOptions: {
+                pie: {
+                    dataLabels: {
+                        enabled: true,
+                        distance: -50,
+                        style: {
+                            fontWeight: 'bold',
+                            color: 'white'
+                        }
+                    },
+                    startAngle: -90,
+                    endAngle: 90,
+                    center: ['50%', '75%'],
+                    size: '110%'
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Browser share',
+                innerSize: '50%',
+                data: [grafica2,
+                    {
+                        name: 'Other',
+                        y: 3.77,
+                        dataLabels: {
+                            enabled: false
+                        }
+                    }
+                ]
+            }]
+        });
+    </script>   
 </body>
 {% endblock %}
