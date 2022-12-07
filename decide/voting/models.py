@@ -274,7 +274,7 @@ class Voting(models.Model):
             pass
 
         # then, we can decrypt that
-        data = {"msgs": response.json(),"type":self.tpye}
+        data = {"msgs": response.json(),"type":self.type}
         response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
 

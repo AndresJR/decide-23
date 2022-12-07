@@ -138,7 +138,7 @@ class VotingBinaryView(generics.ListCreateAPIView):
         return Response({}, status=status.HTTP_201_CREATED)
 
 
-class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
+class VotingBinaryUpdate(generics.RetrieveUpdateDestroyAPIView):
     queryset = VotingBinary.objects.all()
     serializer_class = VotingBinarySerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
