@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from base import mods
 from base.models import Auth, Key
+from store.models import Vote
 
 class QuestionBinary(models.Model):
     
@@ -84,6 +85,8 @@ class VotingBinary(models.Model):
         data = {
             "voting": self.id,
             "auths": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+            "type": self.type
+
         }
         key = mods.post('mixnet', baseurl=auth.url, json=data)
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
@@ -93,9 +96,11 @@ class VotingBinary(models.Model):
 
     def get_votes(self, token=''):
         # gettings votes from store
-        votes = mods.get('store', params={'votingbinary_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        #HAGO EL MISMO CAMBIO QUE EN VIEWS PORQUE CON MODS NO FUNCIONA
+        votes = Vote.objects.filter(voting_id=self.pk,type=self.type).all()
+        print(votes)
         # anon votes
-        return [[i['a'], i['b']] for i in votes]
+        return [[i.a, i.b] for i in votes]
 
     def tally_votes(self, token=''):
         '''
@@ -110,15 +115,15 @@ class VotingBinary(models.Model):
         auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
 
         # first, we do the shuffle
-        data = { "msgs": votes }
+        data = { "msgs": votes,"type":self.type }
         response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
         if response.status_code != 200:
-            # TODO: manage error
+            print(response)
             pass
 
         # then, we can decrypt that
-        data = {"msgs": response.json()}
+        data = {"msgs": response.json(),"type":self.type}
         response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
 
@@ -234,6 +239,7 @@ class Voting(models.Model):
         data = {
             "voting": self.id,
             "auths": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+            "type":self.type
         }
         key = mods.post('mixnet', baseurl=auth.url, json=data)
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
@@ -243,9 +249,9 @@ class Voting(models.Model):
 
     def get_votes(self, token=''):
         # gettings votes from store
-        votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        votes = Vote.objects.filter(voting_id=self.pk,type=self.type).all()
         # anon votes
-        return [[i['a'], i['b']] for i in votes]
+        return [[i.a, i.b] for i in votes]
 
     def tally_votes(self, token=''):
         '''
@@ -260,15 +266,15 @@ class Voting(models.Model):
         auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
 
         # first, we do the shuffle
-        data = { "msgs": votes }
+        data = { "msgs": votes,"type":self.type }
         response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
                 response=True)
         if response.status_code != 200:
-            # TODO: manage error
+            print(response)
             pass
 
         # then, we can decrypt that
-        data = {"msgs": response.json()}
+        data = {"msgs": response.json(),"type":self.tpye}
         response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
                 response=True)
 
