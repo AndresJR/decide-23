@@ -33,12 +33,15 @@ class StoreView(generics.ListAPIView):
         """
 
         vid = request.data.get('voting')
-        type = request.data.get('type')
+
         uid = request.data.get('voter')
         vote = request.data.get('vote')
         print(vid)
+        if(Voting.objects.filter(id=vid).exists()):
+            type='V'
+        else:
+            type='BV'
         print(type)
-        print(uid)
         print(vote)
 
         if type=='BV':
@@ -68,9 +71,9 @@ class StoreView(generics.ListAPIView):
 
         # validating voter
         token = request.auth.key
-        print(token)
+        #print(token)
         voter = mods.post('authentication', entry_point='/getuser/', json={'token': token})
-        print(voter)
+        #print(voter)
         voter_id = voter.get('id', None)
         if not voter_id or voter_id != uid:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
