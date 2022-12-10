@@ -20,8 +20,8 @@
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
 
             <h2>Votación de tipo Si o No</h2>
-            <h2 v-if="!voting.start_date">Votación no comenzada</h2>
-            <h2 v-else-if="!voting.end_date">Votación en curso</h2>
+            <h2 v-if="voting.start_date == 'None'">Votación no comenzada</h2>
+            <h2 v-else-if="voting.end_date == 'None'">Votación en curso</h2>
             <div v-else>
                 <h2 class="heading">Resultados:</h2>
 
@@ -78,14 +78,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
     <script>
+        
         var voting = {{voting|safe}};
-        var app = new Vue({
+        if(voting.start_date && voting.end_date){
+            var app = new Vue({
             delimiters: ['[[', ']]'],
             el: '#app-visualizer',
             data: {
                 voting: voting
             }
-        })
+            })
+        }
+        
     </script>
 
     <script>
