@@ -1,10 +1,12 @@
+from census.models import Census
+from voting.models import ScoreVoting, Voting
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 import django_filters.rest_framework
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
-
+from django.shortcuts import get_object_or_404
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
@@ -29,44 +31,96 @@ class StoreView(generics.ListAPIView):
          * vote: { "a": int, "b": int }
         """
 
+        
         vid = request.data.get('voting')
-        voting = mods.get('voting', params={'id': vid})
-        if not voting or not isinstance(voting, list):
-            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
-        start_date = voting[0].get('start_date', None)
-        end_date = voting[0].get('end_date', None)
-        not_started = not start_date or timezone.now() < parse_datetime(start_date)
-        is_closed = end_date and parse_datetime(end_date) < timezone.now()
-        if not_started or is_closed:
-            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         uid = request.data.get('voter')
         vote = request.data.get('vote')
+        print(vid)
+        if(Voting.objects.filter(id=vid).exists()):
+            type='V'
+        else:
+            type='SV'
+        print(type)
+        print(vote)
+
+        if type=='SV':
+            voting = get_object_or_404(ScoreVoting,pk=vid)
+            print(voting)        
+        else:
+            voting = get_object_or_404(Voting,pk=vid)
+            print(voting)
 
         if not vid or not uid or not vote:
+            print('e1')
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not voting:# or not isinstance(voting, list):
+            print('e2')
+            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+
+        start_date = voting.start_date
+        end_date = voting.end_date
+        not_started = not start_date or timezone.now() < start_date
+        is_closed = end_date and end_date < timezone.now()
+        
+        
+        if not_started or is_closed:
+            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+
+       
 
         # validating voter
         token = request.auth.key
+        #print(token)
         voter = mods.post('authentication', entry_point='/getuser/', json={'token': token})
+        #print(voter)
         voter_id = voter.get('id', None)
         if not voter_id or voter_id != uid:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         # the user is in the census
-        perms = mods.get('census/{}'.format(vid), params={'voter_id': uid}, response=True)
-        if perms.status_code == 401:
-            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+        if type == 'SV':
+            try:
+                perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='SV')
+                print(perms)
+            except:
+                return Response({}, status=status.HTTP_401_UNAUTHORIZED) 
+        else:
+            try:
+                perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='V')
+                print(perms)
+            except:
+                return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
-        a = vote.get("a")
-        b = vote.get("b")
+        voto_registrado = Vote.objects.filter(voting_id=vid, voter_id=uid, type=voting.type)
+            
+        if voto_registrado:
+            #En caso de editar el voto
+            #Se elimina  el voto anterior registrado
+            for vt in voto_registrado:
+                vt.delete()
 
-        defs = { "a": a, "b": b }
-        v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
-                                          defaults=defs)
-        v.a = a
-        v.b = b
+            a = vote.get("a")
+            b = vote.get("b")
+
+            defs = { "a": a, "b": b }
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
+                                            defaults=defs, type=voting.type)
+            v.a = a
+            v.b = b
+
+
+        else:
+            a = vote.get("a")
+            b = vote.get("b")
+
+            defs = { "a": a, "b": b }
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
+                                            defaults=defs, type=voting.type)
+            v.a = a
+            v.b = b
 
         v.save()
-
+        
         return  Response({})
