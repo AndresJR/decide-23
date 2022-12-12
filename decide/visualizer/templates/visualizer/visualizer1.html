@@ -19,8 +19,9 @@
         <div class="voting container">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
 
-            <h2 v-if="!voting.start_date">Votación no comenzada</h2>
-            <h2 v-else-if="!voting.end_date">Votación en curso</h2>
+            <h2>Votación de tipo Si o No</h2>
+            <h2 v-if="voting.start_date == 'None'">Votación no comenzada</h2>
+            <h2 v-else-if="voting.end_date == 'None'">Votación en curso</h2>
             <div v-else>
                 <h2 class="heading">Resultados:</h2>
 
@@ -52,6 +53,7 @@
                         
                     </p>
                 </figure>
+                
             
             </div>
 
@@ -65,23 +67,29 @@
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/cylinder.js"></script>
 
     <!-- Chartjs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
     <script>
+        
         var voting = {{voting|safe}};
-        var app = new Vue({
+        if(voting.start_date && voting.end_date){
+            var app = new Vue({
             delimiters: ['[[', ']]'],
             el: '#app-visualizer',
             data: {
                 voting: voting
             }
-        })
+            })
+        }
+        
     </script>
 
     <script>
@@ -89,21 +97,25 @@
         let postproc = voting.postproc.map((opt) => opt.postproc)
         let votes = voting.postproc.map((opt) => opt.votes)
        
-        let grafica2 = labels.map(function(e, i) {
-            return [e, votes[i]];
-        });
+        const grafica2 = []
+
+        for (let i = 0; i < labels.length; i++) {
+            let aux = [labels[i], votes[i]]
+            console.log(aux)
+            grafica2.push(aux) 
+        }
         
-        Highcharts.chart('container', {
+        
+        /*
+        Highcharts.chart('grafica2', {
             chart: {
                 type: 'column'
             },
             title: {
-                
                 text: voting.name
             },
             xAxis: {
-                categories: labels,
-                crosshair: true
+                categories: labels
             },
             yAxis: {
                 title: {
@@ -111,17 +123,16 @@
                     text: 'Número de votos'
                 }
             },
+            legend: {
+                shadow: true
+            },
             tooltip: {
-                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
-                footerFormat: '</table>',
-                shared: true,
-                useHTML: true
+                shared: true
             },
             plotOptions: {
                 column: {
-                    pointPadding: 0.2,
+                    grouping: false,
+                    shadow: false,
                     borderWidth: 0
                 }
             },
@@ -135,60 +146,108 @@
                 data: postproc
 
             }]
-        });
+        });*/
 
-        
         Highcharts.chart('grafica2', {
             chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: 0,
-                plotShadow: false
+                type: 'pie',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
             },
             title: {
                 text: voting.name,
-                align: 'center',
-                verticalAlign: 'middle',
-                y: 60
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                align: 'left'
             },
             accessibility: {
                 point: {
                     valueSuffix: '%'
                 }
             },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
             plotOptions: {
                 pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 35,
                     dataLabels: {
                         enabled: true,
-                        distance: -50,
-                        style: {
-                            fontWeight: 'bold',
-                            color: 'white'
-                        }
-                    },
-                    startAngle: -90,
-                    endAngle: 90,
-                    center: ['50%', '75%'],
-                    size: '110%'
+                        format: '{point.name}'
+                    }
                 }
             },
             series: [{
                 type: 'pie',
-                name: 'Browser share',
-                innerSize: '50%',
-                data: [grafica2,
+                name: 'Share',
+                data: [
+                {
+                        name: labels[0],
+                        y: votes[0],
+                        sliced: false,
+                        selected: false
+                    },
                     {
-                        name: 'Other',
-                        y: 3.77,
-                        dataLabels: {
-                            enabled: false
-                        }
+                        name: labels[1],
+                        y: votes[1],
+                        sliced: true,
+                        selected: false
                     }
                 ]
             }]
+            
         });
+
+        Highcharts.chart('container', {
+            chart: {
+                type: 'cylinder',
+                options3d: {
+                    enabled: true,
+                    alpha: 15,
+                    beta: 15,
+                    depth: 50,
+                    viewDistance: 25
+                }
+            },
+            title: {
+                text: voting.name
+            },
+            xAxis: {
+                categories: labels
+            },
+            yAxis: {
+                title: {
+                    
+                    text: 'Número de votos'
+                }
+            },
+            tooltip: {
+                headerFormat: '<b>Age: {point.x}</b><br>'
+            },
+            plotOptions: {
+                series: {
+                    depth: 25,
+                    colorByPoint: true
+                }
+            },
+            series: [{
+                name: 'Votes',
+                data: votes,
+                showInLegend: false
+
+            },
+            {
+                name: 'Post proc',
+                data: postproc,
+                showInLegend: false
+
+            }]
+        });
+
+        
     </script>   
 </body>
 {% endblock %}

@@ -22,9 +22,11 @@ class Mixnet(models.Model):
     pubkey = models.ForeignKey(Key, blank=True, null=True,
                                related_name="mixnets_pub",
                                on_delete=models.SET_NULL)
+
                                
-    votingTypes = (('V', 'Voting'), ('SV', 'ScoreVoting'))
+    votingTypes = (('V', 'Voting'), ('SV', 'ScoreVoting'), ('BV', 'BinaryVoting'))
     type = models.CharField(max_length=2, choices=votingTypes, default='V')
+
 
     def __str__(self):
         auths = ", ".join(a.name for a in self.auths.all())

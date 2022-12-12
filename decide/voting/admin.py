@@ -1,9 +1,15 @@
 from django.contrib import admin
 from django.utils import timezone
 
+
 from .models import QuestionOption, ScoreQuestionOption
 from .models import Question, ScoreQuestion
 from .models import Voting, ScoreVoting
+
+from .models import QuestionBinary, QuestionOption, QuestionOptionBinary, VotingBinary
+from .models import Question
+from .models import Voting
+
 
 from .filters import StartedFilter
 
@@ -42,8 +48,24 @@ class ScoreQuestionAdmin(admin.ModelAdmin):
 
 class VotingAdmin(admin.ModelAdmin):
     list_display = ('name', 'start_date', 'end_date')
-    readonly_fields = ('start_date', 'end_date', 'pub_key',
-                       'tally', 'postproc')
+    readonly_fields = ('start_date', 'end_date', 'pub_key','tally', 'postproc')
+    date_hierarchy = 'start_date'
+    list_filter = (StartedFilter,)
+    search_fields = ('name', )
+
+    actions = [ start, stop, tally ]
+
+class QuestionOptionBinaryInline(admin.TabularInline):
+    model = QuestionOptionBinary
+
+
+class QuestionBinaryAdmin(admin.ModelAdmin):
+    inlines = [QuestionOptionBinaryInline]
+
+
+class VotingBinaryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'start_date', 'end_date')
+    readonly_fields = ('start_date', 'end_date', 'pub_key','tally', 'postproc')
     date_hierarchy = 'start_date'
     list_filter = (StartedFilter,)
     search_fields = ('name', )
@@ -63,5 +85,10 @@ class ScoreVotingAdmin(admin.ModelAdmin):
 
 admin.site.register(Voting, VotingAdmin)
 admin.site.register(Question, QuestionAdmin)
+
 admin.site.register(ScoreVoting, ScoreVotingAdmin)
 admin.site.register(ScoreQuestion, ScoreQuestionAdmin)
+
+admin.site.register(VotingBinary, VotingBinaryAdmin)
+admin.site.register(QuestionBinary, QuestionBinaryAdmin)
+

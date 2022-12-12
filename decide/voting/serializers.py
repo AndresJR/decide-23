@@ -14,7 +14,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     options = QuestionOptionSerializer(many=True)
     class Meta:
         model = Question
-        fields = ('desc', 'options')
+        fields = ('desc','options')
 
 
 class VotingSerializer(serializers.HyperlinkedModelSerializer):
@@ -49,13 +49,35 @@ class ScoreQuestionSerializer(serializers.HyperlinkedModelSerializer):
 
 class ScoreVotingSerializer(serializers.HyperlinkedModelSerializer):
     question = ScoreQuestionSerializer(many=False)
-    pub_key = KeySerializer()
-    auths = AuthSerializer(many=True)
+
+
+
+
+
+
+class QuestionBinaryOptionSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = QuestionOption
+        fields = ('number', 'option')
+
+
+class QuestionBinarySerializer(serializers.HyperlinkedModelSerializer):
+    options = QuestionOptionSerializer(many=True)
+    class Meta:
+        model = Question
+        fields = ('desc', 'type','options')
+
+
+class VotingBinarySerializer(serializers.HyperlinkedModelSerializer):
+    question = QuestionSerializer(many=False)
+   
 
     class Meta:
-        model = ScoreVoting
+        model = Voting
+
         fields = ('id', 'name', 'desc', 'question', 'start_date',
                   'end_date', 'pub_key', 'auths', 'tally', 'postproc')
+
 
 
 class ScoreSimpleVotingSerializer(serializers.HyperlinkedModelSerializer):
@@ -64,4 +86,16 @@ class ScoreSimpleVotingSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ScoreVoting
         fields = ('name', 'desc', 'question', 'start_date', 'end_date')
+
+
+class SimpleVotingBinarySerializer(serializers.HyperlinkedModelSerializer):
+    question = QuestionSerializer(many=False)
+
+    class Meta:
+        model = Voting
+        fields = ('name', 'desc', 'question', 'start_date', 'end_date')
+
+
+
+
 
