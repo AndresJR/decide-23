@@ -1,4 +1,8 @@
+
+from voting.models import ScoreVoting
+
 from django.shortcuts import get_object_or_404
+
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from census.models import Census
@@ -7,7 +11,7 @@ import django_filters.rest_framework
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
-
+from django.shortcuts import get_object_or_404
 from .models import Vote
 from .serializers import VoteSerializer
 from base import mods
@@ -32,6 +36,7 @@ class StoreView(generics.ListAPIView):
          * vote: { "a": int, "b": int }
         """
 
+        
         vid = request.data.get('voting')
 
         uid = request.data.get('voter')
@@ -39,13 +44,24 @@ class StoreView(generics.ListAPIView):
         print(vid)
         if(Voting.objects.filter(id=vid).exists()):
             type='V'
+        else if:
+
+            type='SV'
+        print(type)
+        print(vote)
+        
         else:
+
             type='BV'
         print(type)
         print(vote)
+        
+        if type=='SV':
+            voting = get_object_or_404(ScoreVoting,pk=vid)
 
         if type=='BV':
             voting = get_object_or_404(VotingBinary,pk=vid)
+
             print(voting)        
         else:
             voting = get_object_or_404(Voting,pk=vid)
@@ -59,7 +75,7 @@ class StoreView(generics.ListAPIView):
         if not voting:# or not isinstance(voting, list):
             print('e2')
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         start_date = voting.start_date
         end_date = voting.end_date
         not_started = not start_date or timezone.now() < start_date
@@ -68,6 +84,7 @@ class StoreView(generics.ListAPIView):
         
         if not_started or is_closed:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+
 
         # validating voter
         token = request.auth.key
@@ -79,9 +96,15 @@ class StoreView(generics.ListAPIView):
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         # the user is in the census
+
+        if type == 'SV':
+            try:
+                perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='SV')
+
         if type == 'BV':
             try:
                 perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='BV')
+
                 print(perms)
             except:
                 return Response({}, status=status.HTTP_401_UNAUTHORIZED) 
@@ -91,7 +114,7 @@ class StoreView(generics.ListAPIView):
                 print(perms)
             except:
                 return Response({}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
      #Comprobamos que el voto está registrado
         voto_registrado = Vote.objects.filter(voting_id=vid, voter_id=uid, type=voting.type)
             
@@ -119,6 +142,24 @@ class StoreView(generics.ListAPIView):
             v.a = a
             v.b = b
 
-        v.save()
 
+            defs = { "a": a, "b": b }
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
+                                            defaults=defs, type=voting.type)
+            v.a = a
+            v.b = b
+
+
+        else:
+            a = vote.get("a")
+            b = vote.get("b")
+
+            defs = { "a": a, "b": b }
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
+                                            defaults=defs, type=voting.type)
+            v.a = a
+            v.b = b
+
+        v.save()
+        
         return  Response({})

@@ -80,6 +80,7 @@ class Shuffle(APIView):
 
         mn = get_object_or_404(Mixnet, voting_id=voting_id, auth_position=position,type=type)
 
+
         msgs = request.data.get("msgs", [])
         pk = request.data.get("pk", None)
         if pk:
@@ -115,6 +116,7 @@ class Decrypt(APIView):
         type = request.data.get("type")
 
         mn = get_object_or_404(Mixnet, voting_id=voting_id, auth_position=position,type=type)
+
 
         msgs = request.data.get("msgs", [])
         pk = request.data.get("pk", None)
