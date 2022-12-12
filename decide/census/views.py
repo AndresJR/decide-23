@@ -1,7 +1,8 @@
 from django.db.utils import IntegrityError
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -12,6 +13,7 @@ from rest_framework.status import (
         HTTP_409_CONFLICT as ST_409
 )
 
+from voting.models import Voting
 from base.perms import UserIsStaff
 from .models import Census
 from django.contrib.auth.models import User
@@ -36,9 +38,28 @@ class CensusCreate(generics.ListCreateAPIView):
         voters = Census.objects.filter(voting_id=voting_id).values_list('voter_id', flat=True)
         return Response({'voters': voters})
 
+def reuseCensusV2(request):
+    census = Census.objects.all()
+    set_censos=set();
+    for censo in census:
+        set_censos.add(censo.voting_id)
 
-def reuseCensus(request, oldVotingId, newVotingId):
-    census = Census.objects.filter(voting_id=oldVotingId)
+
+    votings = Voting.objects.all()
+    set_voting=set();
+    for v in votings:
+        set_voting.add(v.id)
+
+
+    if request.method == 'GET':
+        return render(request, 'reuseCensus.html', {
+        'choice1': set_censos, 'choice2':set_voting
+    })
+    else:
+        oldVotingId = request.POST['OldVotingId']
+        newVotingId = request.POST['NewVotingId']
+
+        census = Census.objects.filter(voting_id=oldVotingId)
     try:
         for censo in census:
             censo_repe = Census.objects.filter(voting_id=newVotingId,voter_id=censo.voter_id)
@@ -49,6 +70,21 @@ def reuseCensus(request, oldVotingId, newVotingId):
     except IntegrityError:
             return HttpResponse('no se ha podido crear el censo')
     return HttpResponse('se ha creado el censo correctamente')
+    
+        
+
+"""def reuseCensus(request, oldVotingId, newVotingId):
+    census = Census.objects.filter(voting_id=oldVotingId)
+    try:
+        for censo in census:
+            censo_repe = Census.objects.filter(voting_id=newVotingId,voter_id=censo.voter_id)
+            if len(censo_repe) == 0:
+                voter = censo.voter_id
+                reuseCenso = Census(voting_id=newVotingId, voter_id=voter)
+                reuseCenso.save()
+    except IntegrityError:
+            return HttpResponse('no se ha podido crear el censo')
+    return HttpResponse('se ha creado el censo correctamente')"""
 
 def censusForAll(request, voting_id):
     voters = User.objects.all()
@@ -66,8 +102,12 @@ def censusForAll(request, voting_id):
     return render(request, './reuseCensus.html',{'id_repeti':id_repetidas})
     
     
-    
-    
+def prueba(request):
+    census = Census.objects.all()
+    set_censos=set();
+    for censo in census:
+        set_censos.add(censo.voting_id)
+    return render(request, './prueba.html', {'lista':set_censos})
 
 
 

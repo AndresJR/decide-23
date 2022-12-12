@@ -22,7 +22,21 @@
      </div>
      
     <p class="pepe">Estas son los ID de las personas que ya tenían permiso para votar: {{id_repeti}}</p>
+     <form action="" method="post">
+        {% csrf_token %}
+        <select name="OldVotingId" id="OldVotingId">
+            {% for x in choice1 %}
+            <option value={{x}}>{{x}}</option>
+            {% endfor %}
+        </select>
+        <select name="NewVotingId" id="NewVotingId">
+            {% for x in choice2 %}
+            <option value={{x}}>{{x}}</option>
+            {% endfor %}
+        </select>
+        <button>save</button>
 
+     </form>
 
 </body>
 </html>
