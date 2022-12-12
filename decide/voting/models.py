@@ -35,13 +35,13 @@ class QuestionOptionBinary(models.Model):
 class VotingBinary(models.Model):
     name = models.CharField(max_length=200)
     desc = models.TextField(blank=True, null=True)
-    question = models.ForeignKey(QuestionBinary, related_name='votingyn', on_delete=models.CASCADE)
+    question = models.ForeignKey(QuestionBinary, related_name='binaryvoting', on_delete=models.CASCADE)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
-    pub_key = models.OneToOneField(Key, related_name='votingbinary', blank=True, null=True, on_delete=models.SET_NULL)
-    auths = models.ManyToManyField(Auth, related_name='votingsbinary')
+    pub_key = models.OneToOneField(Key, related_name='binaryvoting', blank=True, null=True, on_delete=models.SET_NULL)
+    auths = models.ManyToManyField(Auth, related_name='binaryvotings')
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)

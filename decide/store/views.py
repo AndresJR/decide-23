@@ -38,43 +38,29 @@ class StoreView(generics.ListAPIView):
 
         
         vid = request.data.get('voting')
-
-        uid = request.data.get('voter')
-        vote = request.data.get('vote')
         print(vid)
-        if(Voting.objects.filter(id=vid).exists()):
-            type='V'
-        else if:
-
-            type='SV'
-        print(type)
+        uid = request.data.get('voter')
+        print(uid)
+        vote = request.data.get('vote')
         print(vote)
-        
-        else:
-
-            type='BV'
+        type = request.data.get('type')
         print(type)
-        print(vote)
-        
+
+        if not vid or not uid or not vote:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        if type == 'V':
+            voting = get_object_or_404(Voting,id=vid)
+        elif type == 'BV':
+            voting = get_object_or_404(BinaryVoting,pk=vid)
+        elif type == 'SV':
+            voting = get_object_or_404(ScoreVoting,pk=vid)
         if type=='SV':
             voting = get_object_or_404(ScoreVoting,pk=vid)
-
-        if type=='BV':
-            voting = get_object_or_404(VotingBinary,pk=vid)
-
-            print(voting)        
-        else:
-            voting = get_object_or_404(Voting,pk=vid)
-            print(voting)
-
 
         if not vid or not uid or not vote:
             print('e1')
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not voting:# or not isinstance(voting, list):
-            print('e2')
-            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         start_date = voting.start_date
         end_date = voting.end_date
@@ -100,8 +86,11 @@ class StoreView(generics.ListAPIView):
         if type == 'SV':
             try:
                 perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='SV')
+                print(perms)
+            except:
+                return Response({}, status=status.HTTP_401_UNAUTHORIZED) 
 
-        if type == 'BV':
+        elif type == 'BV':
             try:
                 perms = Census.objects.get(voting_id=vid,voter_id=voter_id,type='BV')
 
@@ -142,17 +131,6 @@ class StoreView(generics.ListAPIView):
             v.a = a
             v.b = b
 
-
-            defs = { "a": a, "b": b }
-            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
-                                            defaults=defs, type=voting.type)
-            v.a = a
-            v.b = b
-
-
-        else:
-            a = vote.get("a")
-            b = vote.get("b")
 
             defs = { "a": a, "b": b }
             v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
