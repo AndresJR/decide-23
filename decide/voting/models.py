@@ -237,6 +237,7 @@ class ScoreVoting(models.Model):
 
     def get_votes(self, token=''):
         votes = Vote.objects.filter(voting_id=self.pk,type=self.type).all()
+       
 
         return [[i.a, i.b] for i in votes]
 
