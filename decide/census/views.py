@@ -35,7 +35,7 @@ def exportcsv(request):
     response = HttpResponse('text/csv')
     response['Content-Disposition'] = 'attachment; filename=censo.csv'
     writer = csv.writer(response)
-    writer.writerow(['VotingID', 'VoterID'])
+    writer.writerow(['VotingID', 'VoterID','Tipo'])
     
     #print(user)
     #print(voting)
@@ -44,16 +44,21 @@ def exportcsv(request):
     for c in lista_census:
        user=User.objects.get(id=c.voter_id).username
        voting=Voting.objects.get(id=c.voting_id).name
-       writer.writerow([voting, user])
+       writer.writerow([voting, user,c.type])
     return response    
 def exportjson(request):
     all_census = Census.objects.all()
     cenus_list = serializers.serialize('json', all_census)
-    return HttpResponse(cenus_list, content_type="text/json-comment-filtered")
+    response = HttpResponse(cenus_list, content_type="text/json-comment-filtered")
+    response['Content-Disposition'] = 'attachment; filename=censo.json'
+    
+    return response
 def exportxml(request):
     all_census = Census.objects.all()
     cenus_list = serializers.serialize('xml', all_census)
-    return HttpResponse(cenus_list, content_type="text/xml")
+    response=HttpResponse(cenus_list, content_type="text/xml")
+    response['Content-Disposition'] = 'attachment; filename=censo.xml'
+    return response
 
 class CensusCreate(generics.ListCreateAPIView):
     permission_classes = (UserIsStaff,)

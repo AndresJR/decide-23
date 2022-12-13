@@ -5,17 +5,19 @@
 
 <td>Id voting</td>
 <td>Id usuario</td>
+<td>Tipo</td>
 </thead>
 <tbody>
 {% for c in object_list %}
 <tr>
    <td>{% getName c %}</td>
    <td>{% getUsername c %}</td>
+   <td>{{ c.type}}</td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
 
 <a href={% url 'export_csv'%}>Export CSV</a>
-<a href={% url 'export_json'%}>Export JSON</a>
+<a href={% url 'export_json'%} target="_blank">Export JSON</a>
 <a href={% url 'export_xml'%}>Export XML</a>
