@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 import csv
+import xml
 from base.perms import UserIsStaff
 from .models import Census
 from voting.models import Voting
@@ -30,7 +31,7 @@ def first_view(request):
     return render(request, 'census/census.html', context)
 def exportcsv(request):
     #print('entro')
-    students = Census.objects.all()
+    lista_census = Census.objects.all()
     response = HttpResponse('text/csv')
     response['Content-Disposition'] = 'attachment; filename=censo.csv'
     writer = csv.writer(response)
@@ -39,10 +40,10 @@ def exportcsv(request):
     #print(user)
     #print(voting)
     
-    #studs = students.values_list('voting_id','voter_id')
-    for std in students:
-       user=User.objects.get(id=std.voter_id).username
-       voting=Voting.objects.get(id=std.voting_id).name
+    #censos = lista_census.values_list('voting_id','voter_id')
+    for c in lista_census:
+       user=User.objects.get(id=c.voter_id).username
+       voting=Voting.objects.get(id=c.voting_id).name
        writer.writerow([voting, user])
     return response    
 def exportjson(request):
