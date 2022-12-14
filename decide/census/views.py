@@ -22,46 +22,68 @@ from .forms import NameForm
 
 
 def first_view(request):
+    print('Entro view')
+    print(request.method)
     census_list = Census.objects.all()
     if request.method == 'POST':
+        print('Entro post')
         # create a form instance and populate it with data from the request:
         form = NameForm(request.POST)
         
+        if 'exportar' in request.POST:
+            print('Hola que tal')
+        if 'buscar' in request.POST:
+            print('Hola que tal cabron')
         # check whether it's valid:
-        if form.is_valid():
+        
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            id= form.cleaned_data['q']
-            v= form.cleaned_data['x']
-            if id:
-                census_list = Census.objects.all()
+        print('Entro is valid')
+        #id= form.cleaned_data['q']
+        #v= form.cleaned_data['x']
+        id= request.POST.get('q','')
+        v= request.POST.get('x','')
+        print(v)
+        print(id)
+        if id:
+            census_list = Census.objects.all()
                 #voter=get_object_or_404(User,id=id)
-                like=User.objects.filter(username__contains=id)
-                for u in like:
-                    census_list = census_list.filter(voter_id=u.id)
-            else:
-                census_list = Census.objects.all()
-            if v:
+            like=User.objects.filter(username__contains=id)
+            for u in like:
+                   census_list = census_list.filter(voter_id=u.id)
+        else:
+            census_list = Census.objects.all()
+        if v:
                 
                 #voter=get_object_or_404(User,id=id)
-                like=Voting.objects.filter(name__contains=v)
-                for vo in like:
-                    census_list = census_list.filter(voting_id=vo.id)
-            
+            like=Voting.objects.filter(name__contains=v)
+            for vo in like:
+                census_list = census_list.filter(voting_id=vo.id)
+        if 'exportar' in request.POST:
+            #type= form.cleaned_data['t']
+            print('Emtro exportar')
+            type= request.POST.get('t','')
+            if type:
+                if type == 'CSV':
+                    return exportcsvFilter(census_list)
+                if type == 'JSON':
+                    return exportjsonFilter(census_list)
+                if type == 'XML':
+                    return exportxmlFiltered(census_list)
+
         
     # if a GET (or any other method) we'll create a blank form
     else:
         form = NameForm()
-        
         census_list = Census.objects.all()
-    voting_list=Voting.objects.all()
-    user_list=User.objects.all()
-    t=len(voting_list)
-    t1=len(user_list)
-    user=User.objects.get(id=1).username
-    voting=Voting.objects.get(id=2).name
-    context = {'object_list': census_list,'u': user,'b': voting,'t': t,'t1': t1,'form':form}
+    #voting_list=Voting.objects.all()
+    #user_list=User.objects.all()
+    #t=len(voting_list)
+    #t1=len(user_list)
+    #user=User.objects.get(id=1).username
+    #voting=Voting.objects.get(id=2).name
+    context = {'object_list': census_list,'form':form,'action':''}
     return render(request, 'census/census.html',context)
 def exportcsv(request):
     #print('entro')
@@ -79,7 +101,27 @@ def exportcsv(request):
        user=User.objects.get(id=c.voter_id).username
        voting=Voting.objects.get(id=c.voting_id).name
        writer.writerow([voting, user,c.type])
+    return response 
+
+
+def exportcsvFilter(list_filter):
+    #print('entro')
+    lista_census = list_filter
+    response = HttpResponse('text/csv')
+    response['Content-Disposition'] = 'attachment; filename=censo.csv'
+    writer = csv.writer(response)
+    writer.writerow(['VotingID', 'VoterID','Tipo'])
+    
+    #print(user)
+    #print(voting)
+    
+    #censos = lista_census.values_list('voting_id','voter_id')
+    for c in lista_census:
+       user=User.objects.get(id=c.voter_id).username
+       voting=Voting.objects.get(id=c.voting_id).name
+       writer.writerow([voting, user,c.type])
     return response    
+
 def exportjson(request):
     all_census = Census.objects.all()
     cenus_list = serializers.serialize('json', all_census)
@@ -87,8 +129,21 @@ def exportjson(request):
     response['Content-Disposition'] = 'attachment; filename=censo.json'
     
     return response
+def exportjsonFilter(list_filtered):
+    all_census = list_filtered
+    cenus_list = serializers.serialize('json', all_census)
+    response = HttpResponse(cenus_list, content_type="text/json-comment-filtered")
+    response['Content-Disposition'] = 'attachment; filename=censo.json'
+    
+    return response
 def exportxml(request):
     all_census = Census.objects.all()
+    cenus_list = serializers.serialize('xml', all_census)
+    response=HttpResponse(cenus_list, content_type="text/xml")
+    response['Content-Disposition'] = 'attachment; filename=censo.xml'
+    return response
+def exportxmlFiltered(list_filtered):
+    all_census = list_filtered
     cenus_list = serializers.serialize('xml', all_census)
     response=HttpResponse(cenus_list, content_type="text/xml")
     response['Content-Disposition'] = 'attachment; filename=censo.xml'
