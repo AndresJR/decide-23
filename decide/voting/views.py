@@ -168,6 +168,7 @@ class ScoreVotingUpdate(generics.RetrieveUpdateDestroyAPIView):
                 voting.save()
                 msg = 'Voting started'
         elif action == 'stop':
+            
             if not voting.start_date:
                 msg = 'Voting is not started'
                 st = status.HTTP_400_BAD_REQUEST
