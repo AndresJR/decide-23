@@ -19,7 +19,7 @@
         <div class="voting container">
             <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
 
-            <h2>Votación de tipo Si o No</h2>
+            <h2>Votación por puntuacion</h2>
             <h2 v-if="voting.start_date == 'None'">Votación no comenzada</h2>
             <h2 v-else-if="voting.end_date == 'None'">Votación en curso</h2>
             <div v-else>
@@ -42,13 +42,11 @@
                     </tbody>
                 </table>
 
-
                 <figure class="highcharts-figure">
-                    <div id="grafica2"></div>
-                    <p class="highcharts-description">
-                        
-                    </p>
+                    <div id="container"></div>
+                    
                 </figure>
+
                 
             
             </div>
@@ -100,62 +98,54 @@
             console.log(aux)
             grafica2.push(aux) 
         }
-        
+
         
 
-        Highcharts.chart('grafica2', {
+        Highcharts.chart('container', {
             chart: {
-                type: 'pie',
+                type: 'cylinder',
                 options3d: {
                     enabled: true,
-                    alpha: 45,
-                    beta: 0
+                    alpha: 15,
+                    beta: 15,
+                    depth: 50,
+                    viewDistance: 25
                 }
             },
             title: {
-                text: voting.name,
-                align: 'left'
+                text: voting.name
             },
-            accessibility: {
-                point: {
-                    valueSuffix: '%'
+            xAxis: {
+                categories: labels
+            },
+            yAxis: {
+                title: {
+                    
+                    text: 'Número de votos'
                 }
             },
             tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                headerFormat: '<b>Age: {point.x}</b><br>'
             },
             plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    depth: 35,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.name}'
-                    }
+                series: {
+                    depth: 25,
+                    colorByPoint: true
                 }
             },
             series: [{
-                type: 'pie',
-                name: 'Share',
-                data: [
-                {
-                        name: labels[0],
-                        y: votes[0],
-                        sliced: false,
-                        selected: false
-                    },
-                    {
-                        name: labels[1],
-                        y: votes[1],
-                        sliced: true,
-                        selected: false
-                    }
-                ]
-            }]
-            
-        });
+                name: 'Votes',
+                data: votes,
+                showInLegend: false
 
+            },
+            {
+                name: 'Post proc',
+                data: postproc,
+                showInLegend: false
+
+            }]
+        });
 
         
     </script>   
