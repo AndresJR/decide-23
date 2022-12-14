@@ -18,6 +18,7 @@ from base import mods
 from base.perms import UserIsStaff
 
 
+
 class StoreView(generics.ListAPIView):
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
@@ -42,21 +43,15 @@ class StoreView(generics.ListAPIView):
         vote = request.data.get('vote')
         type = request.data.get('type')
         print(vid)
-        
-
-
-        if(Voting.objects.filter(id=vid).exists()):
-            type='V'
-        elif(VotingBinary.objects.filter(id=vid).exists()):
-            type='BV'
-        else:
-            type='SV'
         print(type)
         print(vote)
 
         if type=='BV':
             voting = get_object_or_404(VotingBinary,pk=vid)
-            print(voting)        
+            print(voting)    
+        elif type=='SV':
+            voting = get_object_or_404(ScoreVoting,pk=vid)
+            print(voting)    
         else:
             voting = get_object_or_404(Voting,pk=vid)
             print(voting)
