@@ -1,5 +1,11 @@
 {% load customized %}
 <h1>{{u}} - {{b}} - {{t}} - {{t1}}</h1>
+<form action="#" method="post">
+   {% csrf_token %}
+   {{ form }}
+   <input type="submit" value="Buscar por nombre de usuario">
+</form>
+
 <table>
 <thead>
 

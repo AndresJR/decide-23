@@ -9,8 +9,8 @@ from rest_framework.status import (
         HTTP_401_UNAUTHORIZED as ST_401,
         HTTP_409_CONFLICT as ST_409
 )
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse,HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 import csv
 import xml
@@ -18,17 +18,51 @@ from base.perms import UserIsStaff
 from .models import Census
 from voting.models import Voting
 from django.core import serializers
+from .forms import NameForm
+
 
 def first_view(request):
     census_list = Census.objects.all()
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NameForm(request.POST)
+        
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            id= form.cleaned_data['q']
+            v= form.cleaned_data['x']
+            if id:
+                census_list = Census.objects.all()
+                #voter=get_object_or_404(User,id=id)
+                like=User.objects.filter(username__contains=id)
+                for u in like:
+                    census_list = census_list.filter(voter_id=u.id)
+            else:
+                census_list = Census.objects.all()
+            if v:
+                
+                #voter=get_object_or_404(User,id=id)
+                like=Voting.objects.filter(name__contains=v)
+                for vo in like:
+                    census_list = census_list.filter(voting_id=vo.id)
+            
+        
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NameForm()
+        
+        census_list = Census.objects.all()
     voting_list=Voting.objects.all()
     user_list=User.objects.all()
     t=len(voting_list)
     t1=len(user_list)
     user=User.objects.get(id=1).username
     voting=Voting.objects.get(id=2).name
-    context = {'object_list': census_list,'u': user,'b': voting,'t': t,'t1': t1}
-    return render(request, 'census/census.html', context)
+    context = {'object_list': census_list,'u': user,'b': voting,'t': t,'t1': t1,'form':form}
+    return render(request, 'census/census.html',context)
 def exportcsv(request):
     #print('entro')
     lista_census = Census.objects.all()
@@ -59,6 +93,9 @@ def exportxml(request):
     response=HttpResponse(cenus_list, content_type="text/xml")
     response['Content-Disposition'] = 'attachment; filename=censo.xml'
     return response
+
+
+
 
 class CensusCreate(generics.ListCreateAPIView):
     permission_classes = (UserIsStaff,)
