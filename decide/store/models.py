@@ -5,7 +5,7 @@ from base.models import BigBigField
 class Vote(models.Model):
     voting_id = models.PositiveIntegerField()
     voter_id = models.PositiveIntegerField()
-    votingTypes = (('V', 'Voting'), ('BV', 'BinaryVoting'))
+    votingTypes = (('V', 'Voting'), ('BV', 'BinaryVoting'),('SV', 'ScoreVoting'))
     type = models.CharField(max_length=2, choices=votingTypes, default='V')
 
 
@@ -14,8 +14,5 @@ class Vote(models.Model):
 
     voted = models.DateTimeField(auto_now=True)
     
-    votingTypes = (('V', 'Voting'), ('SV', 'ScoreVoting'))
-    type = models.CharField(max_length=2, choices=votingTypes, default='V')
-
     def __str__(self):
         return '{}: {}'.format(self.voting_id, self.voter_id,self.type)

@@ -38,26 +38,32 @@ class StoreView(generics.ListAPIView):
 
         
         vid = request.data.get('voting')
-        print(vid)
         uid = request.data.get('voter')
-        print(uid)
         vote = request.data.get('vote')
-        print(vote)
         type = request.data.get('type')
+        print(vid)
+        
+
+
+        if(Voting.objects.filter(id=vid).exists()):
+            type='V'
+        elif(VotingBinary.objects.filter(id=vid).exists()):
+            type='BV'
+        else:
+            type='SV'
         print(type)
+        print(vote)
+
+        if type=='BV':
+            voting = get_object_or_404(VotingBinary,pk=vid)
+            print(voting)        
+        else:
+            voting = get_object_or_404(Voting,pk=vid)
+            print(voting)
 
         if not vid or not uid or not vote:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
-        if type == 'V':
-            voting = get_object_or_404(Voting,id=vid)
-        elif type == 'BV':
-            voting = get_object_or_404(BinaryVoting,pk=vid)
-        elif type == 'SV':
-            voting = get_object_or_404(ScoreVoting,pk=vid)
-        if type=='SV':
-            voting = get_object_or_404(ScoreVoting,pk=vid)
-
+        
         if not vid or not uid or not vote:
             print('e1')
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
