@@ -19,7 +19,7 @@ import csv
 import xml
 from base.perms import UserIsStaff
 from .models import Census
-from voting.models import Voting
+from voting.models import Voting, VotingBinary, ScoreVoting
 from django.core import serializers
 from .forms import NameForm
 
@@ -213,7 +213,8 @@ def reuseCensusV2(request):
                 reuseCenso.save()
     except IntegrityError:
             return HttpResponse('no se ha podido crear el censo')
-    return HttpResponse('se ha creado el censo correctamente')
+            
+    return render(request, 'indexCensus.html', {'boleano':True})
 
 
 def indexCensus(request):
@@ -252,7 +253,38 @@ def reuseCensusV2BV(request):
             return HttpResponse('no se ha podido crear el censo')
     return HttpResponse('se ha creado el censo correctamente')        
 
+def reuseCensusV2SV(request):
+    census2 = Census.objects.filter(type="SV")
+    set_censos_sv=set();
+    for censo in census2:
+        set_censos_sv.add(censo.voting_id)
 
+
+    votings = ScoreVoting.objects.all()
+    set_voting=set();
+    for v in votings:
+        set_voting.add(v)
+
+
+    if request.method == 'GET':
+        return render(request, 'reuseCensus.html', {
+        'choice1': set_censos_sv, 'choice2':set_voting
+    })
+    else:
+        oldVotingId = request.POST['OldVotingId']
+        newVotingId = request.POST['NewVotingId']
+
+        census = Census.objects.filter(voting_id=oldVotingId, type="SV")
+    try:
+        for censo in census:
+            censo_repe = Census.objects.filter(voting_id=newVotingId,voter_id=censo.voter_id, type="SV")
+            if len(censo_repe) == 0:
+                voter = censo.voter_id
+                reuseCenso = Census(voting_id=newVotingId, voter_id=voter, type="SV")
+                reuseCenso.save()
+    except IntegrityError:
+            return HttpResponse('no se ha podido crear el censo')
+    return HttpResponse('se ha creado el censo correctamente') 
 
 def censusForAll(request):
     voters = User.objects.all()
@@ -271,9 +303,9 @@ def censusForAll(request):
     try:
         for voter in voters:
             id = voter.id
-            censo_repe=Census.objects.filter(voting_id=voting_id,voter_id=id)
+            censo_repe=Census.objects.filter(voting_id=voting_id,voter_id=id, type="V")
             if len(censo_repe) == 0:     
-                census = Census(voting_id=voting_id, voter_id=id)
+                census = Census(voting_id=voting_id, voter_id=id, type="V")
                 census.save()
             else: 
                 id_repetidas += (str(id)+",")
@@ -299,7 +331,7 @@ def censusForAllBV(request):
     try:
         for voter in voters:
             id = voter.id
-            censo_repe=Census.objects.filter(voting_id=voting_id,voter_id=id)
+            censo_repe=Census.objects.filter(voting_id=voting_id,voter_id=id, type="BV")
             if len(censo_repe) == 0:     
                 census = Census(voting_id=voting_id, voter_id=id, type="BV")
                 census.save()
@@ -307,7 +339,35 @@ def censusForAllBV(request):
                 id_repetidas += (str(id)+",")
     except IntegrityError:
             return HttpResponse('no se ha podido crear el censo')
-    return HttpResponse('se ha creado el censo correctamente')         
+    return HttpResponse('se ha creado el censo correctamente') 
+
+
+def censusForAllSV(request):
+    voters = User.objects.all()
+    votings=ScoreVoting.objects.filter(type="SV")
+    id_repetidas = ""
+    set_votaciones = set()
+    for voting in votings:
+        set_votaciones.add(voting)
+    
+    
+    if request.method=='GET':
+        return render(request, './censusForAll.html', {'votaciones':votings, 'choice':set_votaciones})
+    else:
+        voting_id = request.POST['voting_id']
+
+    try:
+        for voter in voters:
+            id = voter.id
+            censo_repe=Census.objects.filter(voting_id=voting_id,voter_id=id, type="SV")
+            if len(censo_repe) == 0:     
+                census = Census(voting_id=voting_id, voter_id=id, type="SV")
+                census.save()
+            else: 
+                id_repetidas += (str(id)+",")
+    except IntegrityError:
+            return HttpResponse('no se ha podido crear el censo')
+    return HttpResponse('se ha creado el censo correctamente')          
     
 def prueba(request):
     census = Census.objects.filter(type="V")

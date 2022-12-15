@@ -19,7 +19,7 @@
     <form action="" method="post" class="form">
       {% csrf_token %}
         <div class="col">
-        <select class="select" aria-label="Default select example" name="voting_id" id="OldVotingId">
+        <select class="select" aria-label="Default select example" name="voting_id" id="voting_id">
             <option selected>VOTACION A RELLENAR</option>
             {% for x in votaciones %}
             <option value={{x.id}}>{{x.id}} '{{x.name}}'</option>
@@ -28,6 +28,7 @@
     </div>
     <button class="btn btn-outline-danger" id="botonSave">Rellenar censo</button>
     </form>
-
+    
+         <a id="botonHome" href="/census" class="btn btn-default btn-lg" ><span class="glyphicon glyphicon-home"></span>  Inicio</a>
 </body>
 </html>
