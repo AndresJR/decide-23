@@ -23,3 +23,11 @@
   body{
     background-image: url('./fondoEvoting.png')!important;
   }
+
+  #botonHome{
+    position: absolute; /* Posicionamos de forma absoluta*/
+  top: 5%; /* Calculamos la posición*/
+  right: 90%; /* Calculamos la posición*/
+  width: auto!important;
+  height: auto!important;
+  }

@@ -4,6 +4,8 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from .models import Census
+from voting.models import Voting
+from voting.models import Question
 from base import mods
 from base.tests import BaseTestCase
 
@@ -12,6 +14,10 @@ class CensusTestCase(BaseTestCase):
 
     def setUp(self):
         super().setUp()
+        q = Question(desc='test question')
+        q.save()
+        v = Voting(name='test voting', question=q,type='V')
+        v.save()
         self.census = Census(voting_id=1, voter_id=1)
         self.census.save()
 
@@ -73,3 +79,16 @@ class CensusTestCase(BaseTestCase):
         response = self.client.delete('/census/{}/'.format(1), data, format='json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
+    
+    def testExportJSON(self):
+        response = self.client.get('/census/exportjson/')
+        self.assertEqual(response.get('Content-Type'), 'text/json-comment-filtered')
+        self.assertEqual(response.get('Content-Disposition'), 'attachment; filename=censo.json')
+    def testExportXML(self):
+        response = self.client.get('/census/exportxml/')
+        self.assertEqual(response.get('Content-Type'), 'text/xml')
+        self.assertEqual(response.get('Content-Disposition'), 'attachment; filename=censo.xml')
+    def testExportCSV(self):
+        response = self.client.get('/census/exportcsv/')
+        self.assertEqual(response.get('Content-Disposition'), 'attachment; filename=censo.csv')
+        
