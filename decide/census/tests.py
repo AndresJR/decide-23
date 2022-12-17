@@ -18,7 +18,7 @@ class CensusTestCase(BaseTestCase):
         q.save()
         v = Voting(name='test voting', question=q,type='V')
         v.save()
-        self.census = Census(voting_id=1, voter_id=1)
+        self.census = Census(voting_id=1, voter_id=1, type='V')
         self.census.save()
 
     def tearDown(self):
@@ -80,6 +80,29 @@ class CensusTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
     
+    def test_reuseCensus(self):
+        data = {'OldVotingId':1, 'NewVotingId':2}
+        response = self.client.post('/census/reuseCensusV2/V/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/reuseCensusV2/BV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/reuseCensusV2/SV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_censusForAll(self):
+        data = {'voting_id':1}
+        response = self.client.post('/census/censusForAll/V/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/censusForAll/BV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/censusForAll/SV/', data, format='json')
+        self.assertEqual(response.status_code, 200)     
+
+
     def testExportJSON(self):
         response = self.client.get('/census/exportjson/')
         self.assertEqual(response.get('Content-Type'), 'text/json-comment-filtered')
