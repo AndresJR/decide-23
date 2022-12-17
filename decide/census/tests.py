@@ -80,6 +80,12 @@ class CensusTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
     
+    def test_reuseCensus(self):
+        data = {'OldVotingId':1, 'NewVotingId':2}
+        response = self.client.post('/census/reuseCensusV2/V/', data, format='json')
+        self.assertEqual(response.status_code, 201)
+
+
     def testExportJSON(self):
         response = self.client.get('/census/exportjson/')
         self.assertEqual(response.get('Content-Type'), 'text/json-comment-filtered')
