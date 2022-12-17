@@ -83,7 +83,24 @@ class CensusTestCase(BaseTestCase):
     def test_reuseCensus(self):
         data = {'OldVotingId':1, 'NewVotingId':2}
         response = self.client.post('/census/reuseCensusV2/V/', data, format='json')
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/reuseCensusV2/BV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/reuseCensusV2/SV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_censusForAll(self):
+        data = {'voting_id':1}
+        response = self.client.post('/census/censusForAll/V/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/censusForAll/BV/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/census/censusForAll/SV/', data, format='json')
+        self.assertEqual(response.status_code, 200)     
 
 
     def testExportJSON(self):

@@ -238,8 +238,8 @@ def reuseCensusV2BV(request):
         'choice1': set_censos_bv, 'choice2':set_voting
     })
     else:
-        oldVotingId = request.POST['OldVotingId']
-        newVotingId = request.POST['NewVotingId']
+        oldVotingId = request.POST.get('OldVotingId', False)
+        newVotingId = request.POST.get('NewVotingId', False)
 
         census = Census.objects.filter(voting_id=oldVotingId, type="BV")
     try:
@@ -271,8 +271,8 @@ def reuseCensusV2SV(request):
         'choice1': set_censos_sv, 'choice2':set_voting
     })
     else:
-        oldVotingId = request.POST['OldVotingId']
-        newVotingId = request.POST['NewVotingId']
+        oldVotingId = request.POST.get('OldVotingId', False)
+        newVotingId = request.POST.get('NewVotingId', False)
 
         census = Census.objects.filter(voting_id=oldVotingId, type="SV")
     try:
@@ -298,7 +298,7 @@ def censusForAll(request):
     if request.method=='GET':
         return render(request, './censusForAll.html', {'votaciones':votings, 'choice':set_votaciones})
     else:
-        voting_id = request.POST['voting_id']
+        voting_id = request.POST.get('voting_id', False)
 
     try:
         for voter in voters:
@@ -326,7 +326,7 @@ def censusForAllBV(request):
     if request.method=='GET':
         return render(request, './censusForAll.html', {'votaciones':votings, 'choice':set_votaciones})
     else:
-        voting_id = request.POST['voting_id']
+        voting_id = request.POST.get('voting_id', False)
 
     try:
         for voter in voters:
@@ -354,7 +354,7 @@ def censusForAllSV(request):
     if request.method=='GET':
         return render(request, './censusForAll.html', {'votaciones':votings, 'choice':set_votaciones})
     else:
-        voting_id = request.POST['voting_id']
+        voting_id = request.POST.get('voting_id', False)
 
     try:
         for voter in voters:
