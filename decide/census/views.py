@@ -200,8 +200,8 @@ def reuseCensusV2(request):
         'choice1': set_censos, 'choice2':set_voting
     })
     else:
-        oldVotingId = request.POST['OldVotingId']
-        newVotingId = request.POST['NewVotingId']
+        oldVotingId = request.POST.get('OldVotingId', False)
+        newVotingId = request.POST.get('NewVotingId', False)
 
         census = Census.objects.filter(voting_id=oldVotingId)
     try:

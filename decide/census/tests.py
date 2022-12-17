@@ -18,7 +18,7 @@ class CensusTestCase(BaseTestCase):
         q.save()
         v = Voting(name='test voting', question=q,type='V')
         v.save()
-        self.census = Census(voting_id=1, voter_id=1)
+        self.census = Census(voting_id=1, voter_id=1, type='V')
         self.census.save()
 
     def tearDown(self):
