@@ -10,3 +10,5 @@ coverage==4.5.2
 django-nose==1.4.6
 jsonnet==0.12.1
 selenium
+gevent==22.10.1
+geventhttpclient==2.0.8
