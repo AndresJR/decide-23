@@ -58,3 +58,6 @@ class VisualizerViewScore(TemplateView):
             raise Http404
 
         return context
+
+
+        
